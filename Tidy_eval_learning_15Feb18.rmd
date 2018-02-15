@@ -1,0 +1,105 @@
+---
+title: "Tidy Evaluation"
+author: "sid"
+date: "15 February 2018"
+output: html_document
+---
+
+## Learning tidy evaluation from hadley's "Advanced R" book.
+
+```{r, echo=FALSE, eval=FALSE}
+x <- seq(0, 2 * pi, length = 100)
+sinx <- sin(x)
+plot(x, sinx, type = "l")
+```
+
+Going back to the chapter on "Environments" since it's a pre-requisite to understand NSE.
+
+Download the followining library - *"pryr"*
+
+```{r, echo=FALSE, eval=FALSE}
+install.packages("pryr")
+library("pryr")
+```
+ Important concepts about an environment:
+ 
+- An environment is a name-object binding.
+- All environment have parents except the empty environment.
+- The parent of an environment is the las package thatw as loaded by library().
+- All the names in an environment are unique.
+- The names in an environment are not ordered.
+- Environmenta have reference semantics. 
+
+There are four types of environments:
+
+- Global environment, the one in which we nomally work **globalenv()**. The parent of the 
+  global environment is the package that we last loaded with library() or require().
+- Base environment - **baseenv()** -is the environment of the base package. It's parent is the
+  empty environment.
+- The **emptyenv()** is the utimate ancestor of all environments and the only one without a parent.
+- The **environment()** is the current environment.
+
+**search()** lists all parents of the global environment.It contains one environment for each 
+attached package and any other attached objects.
+
+
+```{r, echo=TRUE, eval=TRUE, include=TRUE}
+library("pryr")
+search()
+as.environment("package:pryr")
+
+```
+To create an an environment manually we use new.env(). To list its bindings we use ls() and to see
+its parent environment we use parent.env()
+
+```{r, echo=TRUE, eval=TRUE, include=TRUE}
+e <- new.env()
+# the default parent provided by new.env() is environment from 
+# which it is called - in this case that's the global environment.
+ls(e)
+parent.env(e)
+```
+In order to modify bindings in a environment we add components like we do in a list.
+
+```{r, echo=TRUE, eval=TRUE}
+e$a <- 1
+e$b <- 2
+ls(e)
+e$a
+```
+
+By default, ls() only shows elements whose name does not start with ..Use all.names=TRUE to show all bindings in an environment.
+
+```{r}
+e$.a <- 2
+ls(e)
+ls(e, all.names=TRUE)
+```
+
+Another useful way to view the environment is with ls.str(). Use the all.names=TRUE argument. It is better than str() since it shows all the components of the environment.
+
+```{r}
+str(e, all.names=TRUE)
+ls.str(e, all.names = TRUE)
+```
+
+Given a name, we can extract the value to which it is bound by using $, [[]], get()
+```{r}
+e$c <- 3
+e$c
+e[["c"]]
+get("c", envir = e)
+```
+
+Use rm() to delete a binding.
+
+```{r}
+e <- new.env()
+
+e$a <- 1
+e$b <- NULL
+
+ls(e, all.names = TRUE)
+rm("a", envir = e)
+ls(e)
+```
